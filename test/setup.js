@@ -1,9 +1,10 @@
 import http from 'http'
 import express from 'express'
 import bodyParser from 'body-parser'
-import kill from 'kill-port'
+import stoppable from 'stoppable'
 
-global.PORT = 4000
+var AsyncRouter = require("express-async-router").AsyncRouter;
+var router = AsyncRouter();
 
 const app = express()
 
@@ -11,11 +12,15 @@ let attemptLeft = 3
 
 app.use(bodyParser.json())
 
-app.get('/name', (req, res) => {
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+router.get('/name', (req, res) => {
   res.status(200).send({name: 'name'})
 })
 
-app.post('/name', (req, res) => {
+router.post('/name', (req, res) => {
   if (req.body.success) {
     res.status(200).send({success: true})
   } else {
@@ -23,13 +28,17 @@ app.post('/name', (req, res) => {
   }
 })
 
-app.get('/timeout', (req, res) => {
-  setTimeout(() => {
-    res.status(200).send({success: true})
-  }, 1000)
+router.get('/timeout', async (req, res) => {
+  await timeout(500);
+  res.status(200).send({success: true});
 })
 
-app.get('/retries', (req, res) => {
+router.get('/timeout2', async (req, res) => {
+  await timeout(100);
+  res.status(200).send({success: true});
+})
+
+router.get('/retries', (req, res) => {
   attemptLeft = attemptLeft - 1
   if (attemptLeft === 0) {
     res.status(200).send({success: true})
@@ -39,11 +48,13 @@ app.get('/retries', (req, res) => {
   }
 })
 
-const server = http.createServer(app)
+app.use('/', router)
+global.PORT = 8000
+const rawServer = http.createServer(app)
 
+const server = stoppable(rawServer)
 server.listen(global.PORT)
 
 global.stop = function () {
   server.close()
-  kill(global.PORT)
 }

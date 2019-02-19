@@ -1,18 +1,26 @@
+import {fetch} from 'whatwg-fetch'
 import retryingFetch from './retrying-fetch'
 
 let browserFetch = false
 
-try {
-  browserFetch = window && window.fetch
-} catch (error) {}
+if (window && window.fetch && ('signal' in new window.Request(''))) {
+  browserFetch = window.fetch
+} else {
+  browserFetch = fetch
+}
 
-function tenaciousFetch (url = '', config = {}) {
+async function tenaciousFetch(url = '', config = {}) {
+
   config = Object.assign({
-    retries: 1,
-    retryDelay: 1000,
+    factor: 1,
+    retries: 0,
+    retryDelay: undefined,
+    retryMinDelay: 1000,
+    retryMaxDelay: Infinity,
     retryStatus: [],
     fetcher: browserFetch,
-    timeout: undefined
+    abortTimeout: undefined,
+    totalTimeLimit: undefined
   }, config)
 
   if (!config.fetcher || typeof config.fetcher !== 'function') {
@@ -21,30 +29,18 @@ function tenaciousFetch (url = '', config = {}) {
     )
   }
 
+  if (typeof config.onFailedAttempt != 'function') {
+    config.onFailedAttempt = () => {}
+  }
   if (typeof config.retryStatus === 'string' || typeof config.retryStatus === 'number') {
     config.retryStatus = [Number.parseInt(config.retryStatus)]
   }
-
-  const timeout = config.timeout
-
-  if (timeout && Number.isInteger(timeout)) {
-    return Promise.race([
-      retryingFetch(config.retries, url, config),
-      new Promise((resolve, reject) =>
-        setTimeout(
-          () =>
-            reject(
-              new Error(
-                `tenacious-fetch: Request took longer than timeout of ${timeout} ms.`
-              )
-            ),
-          timeout
-        )
-      )
-    ])
+  if (config.retryDelay) {
+    config.retryMinDelay = config.retryDelay
+    delete config.retryDelay
   }
 
-  return retryingFetch(config.retries, url, config)
+  const start_time = performance.now()
+  return retryingFetch(config.retries, url, config, start_time)
 }
-
 export default tenaciousFetch

@@ -1,53 +1,60 @@
+/* global AbortController */
 import {linear, exponential} from './backoff'
+import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only'
+const pRetry = require('p-retry');
 
-export default function retryingFetch (retries, url, config) {
-  return new Promise((resolve, reject) => {
-    function fetchAttempt (url, config, retriesLeft) {
-      let {retryStatus, fetcher} = config
-      fetcher(url, config)
-        .then(res => {
-          if (retryStatus.includes(res.status)) {
-            // TODO: - Remove repetition
-            if (retriesLeft > 0) {
-              retriesLeft--
-              const retryDelay = getRetryDelay(config, retriesLeft)
-
-              if (config.onRetry && typeof config.onRetry === 'function') {
-                config.onRetry({retriesLeft, retryDelay, response: res})
-              }
-
-              setTimeout(() => fetchAttempt(url, config, retriesLeft), retryDelay)
-            } else {
-              reject(res)
-            }
-          } else {
-            resolve(res)
-          }
-        })
-        .catch(error => {
-          if (retriesLeft > 0) {
-            // TODO: - Remove repetition
-            retriesLeft--
-            const retryDelay = getRetryDelay(config, retriesLeft)
-
-            if (config.onRetry && typeof config.onRetry === 'function') {
-              config.onRetry({retriesLeft, retryDelay, response: error})
-            }
-
-            setTimeout(() => fetchAttempt(url, config, retriesLeft), retryDelay)
-          } else {
-            reject(error)
-          }
-        })
-    }
-
-    fetchAttempt(url, config, retries)
+function retryingFetch(retries, url, config, start_time = 0) {
+  return pRetry(
+    (attempt) => {
+      if (config.abortTimeout || config.totalTimeLimit) {
+         return timeoutRetryPromise(url, config, start_time);
+      } else {
+         return fetchAttempt(url, config);
+    }},
+    {
+      onFailedAttempt: config.onFailedAttempt,
+      retries: config.retries,
+      factor: config.factor,
+      minTimeout: config.retryMinDelay,
+      maxTimeout: config.retryMaxDelay
   })
 }
 
-function getRetryDelay ({retryDelay, factor, retries}, retriesLeft) {
-  if (factor && typeof factor === 'number' && Number.isInteger(factor)) {
-    return exponential(factor, retries - retriesLeft)
-  }
-  return linear(retryDelay, retries - retriesLeft)
+function timeoutRetryPromise(url, config, start_time) {
+  var abortTimer;
+  var controller;
+  return Promise.race([
+    new Promise((resolve, reject) => {
+      controller = new AbortController();
+      config.signal = controller.signal;
+      if (config.totalTimeLimit && performance.now() - start_time > config.totalTimeLimit) {
+        if (abortTimer) { clearTimer(abortTimer) }
+          reject(new pRetry.AbortError(new pRetry.AbortError('Total Time Limit Exceeded')))
+      };
+      resolve();
+    })
+    .then(res => { return fetchAttempt(url, config) }),
+    new Promise((resolve, reject) =>
+      abortTimer = setTimeout(() => {
+        controller.abort();;
+        },
+        config.abortTimeout || config.totalTimeLimit)
+    )
+  ])
 }
+
+function fetchAttempt(url, config) {
+  return new Promise((resolve, reject) => {
+    config.fetcher(url, config)
+      .then(res => {
+        if (config.retryStatus.includes(res.status)) {
+            let err = new Error(res.statusText)
+            reject(err)
+        }
+        resolve(res)
+      })
+      .catch(e => reject(e))
+  })
+}
+
+export default retryingFetch

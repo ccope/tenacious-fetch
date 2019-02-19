@@ -22,11 +22,13 @@
     "babel-preset-env": "^1.7.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
+    "express-async-router": "^0.1.15",
     "jest": "^22.4.3",
     "kill-port": "^1.2.0",
     "microbundle": "^0.4.4",
-    "node-fetch": "^2.1.2",
-    "standard": "^11.0.1"
+    "node-fetch": "^2.3.0",
+    "standard": "^11.0.1",
+    "stoppable": "^1.1.0"
   },
   "keywords": [
     "fetch",
@@ -48,5 +50,10 @@
     "setupFiles": [
       "./test/setup.js"
     ]
+  },
+  "dependencies": {
+    "abortcontroller-polyfill": "^1.2.4",
+    "p-retry": "^3.0.1",
+    "whatwg-fetch": "^3.0.0"
   }
 }
