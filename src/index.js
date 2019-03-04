@@ -1,9 +1,9 @@
-if (window && window.fetch && ('signal' in new window.Request(''))) {
-  const browserFetch = window.fetch
-} else if (window) {
-  const browserFetch = require('whatwg-fetch')
+if (typeof window === 'undefined') {
+  const fetchImpl = require('node-fetch')
+} else if (window && window.fetch && ('signal' in new window.Request(''))) {
+  const fetchImpl = window.fetch
 } else {
-  const browserFetch = require('node-fetch')
+  const fetchImpl = require('whatwg-fetch')
 }
 import retryingFetch from './retrying-fetch'
 
@@ -17,7 +17,7 @@ async function tenaciousFetch(url = '', config = {}) {
     retryMinDelay: 1000,
     retryMaxDelay: Infinity,
     retryStatus: [],
-    fetcher: browserFetch,
+    fetcher: fetchImpl,
     abortTimeout: undefined,
     totalTimeLimit: undefined
   }, config)
