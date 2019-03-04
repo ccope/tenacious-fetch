@@ -1,13 +1,12 @@
-import {fetch} from 'whatwg-fetch'
+if (window && window.fetch && ('signal' in new window.Request(''))) {
+  const browserFetch = window.fetch
+} else if (window) {
+  const browserFetch = require('whatwg-fetch')
+} else {
+  const browserFetch = require('node-fetch')
+}
 import retryingFetch from './retrying-fetch'
 
-let browserFetch = false
-
-if (window && window.fetch && ('signal' in new window.Request(''))) {
-  browserFetch = window.fetch
-} else {
-  browserFetch = fetch
-}
 
 async function tenaciousFetch(url = '', config = {}) {
 

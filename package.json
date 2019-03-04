@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.2.4",
+    "node-fetch": "^2.3.0",
     "p-retry": "^3.0.1",
     "whatwg-fetch": "^3.0.0"
   }
