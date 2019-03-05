@@ -1,15 +1,15 @@
 {
   "name": "tenacious-fetch",
-  "version": "3.0.0",
+  "version": "3.0.0-scaleai4",
   "description": "Tiny fetch API wrapper to add support for retries, retry delay & timeouts",
-  "main": "dist/tenacious-fetch.js",
-  "module": "dist/tenacious-fetch.m.js",
+  "main": "dist/main.node.js",
+  "browser": "dist/main.js",
   "source": "src/index.js",
   "repository": "https://github.com/tiaanduplessis/tenacious-fetch",
   "author": "Tiaan du Plessis",
   "license": "MIT",
   "scripts": {
-    "build": "microbundle",
+    "build": "webpack --config webpack.config.js",
     "lint": "standard --fix ./**/*.js",
     "test": "jest",
     "coverage": "jest --coverage",
@@ -19,7 +19,10 @@
     "dist"
   ],
   "devDependencies": {
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-loader": "^8.0.5",
+    "babelify": "^10.0.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "express-async-router": "^0.1.15",
@@ -53,8 +56,10 @@
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.2.4",
-    "node-fetch": "^2.3.0",
-    "p-retry": "^3.0.1",
-    "whatwg-fetch": "^3.0.0"
+    "isomorphic-fetch": "git+https://github.com/scaleapi/isomorphic-fetch.git#v2.99.0-scaleai1",
+    "p-retry": "^3.0.1"
+  },
+  "resolutions": {
+    "fbjs/isomorphic-fetch": "git+https://github.com/scaleapi/isomorphic-fetch.git#v2.99.0-scaleai1"
   }
 }
