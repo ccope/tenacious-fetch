@@ -1,9 +1,13 @@
 /* global AbortController */
-import {linear, exponential} from './backoff'
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only'
+try {
+  const { performance } = require('perf_hooks');
+} catch (e) {};
 const pRetry = require('p-retry');
 
-function retryingFetch(retries, url, config, start_time = 0) {
+
+function retryingFetch(retries, url, config) {
+  const start_time = performance.now()
   return pRetry(
     (attempt) => {
       if (config.abortTimeout || config.totalTimeLimit) {

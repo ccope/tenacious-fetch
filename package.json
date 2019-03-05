@@ -22,6 +22,7 @@
     "@babel/core": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "babel-loader": "^8.0.5",
+    "babel-plugin-add-module-exports": "^1.0.0",
     "babelify": "^10.0.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
@@ -31,7 +32,9 @@
     "microbundle": "^0.4.4",
     "node-fetch": "^2.3.0",
     "standard": "^11.0.1",
-    "stoppable": "^1.1.0"
+    "stoppable": "^1.1.0",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
   },
   "keywords": [
     "fetch",
@@ -56,10 +59,7 @@
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.2.4",
-    "isomorphic-fetch": "git+https://github.com/scaleapi/isomorphic-fetch.git#v2.99.0-scaleai1",
+    "cross-fetch": "^3.0.1",
     "p-retry": "^3.0.1"
-  },
-  "resolutions": {
-    "fbjs/isomorphic-fetch": "git+https://github.com/scaleapi/isomorphic-fetch.git#v2.99.0-scaleai1"
   }
 }

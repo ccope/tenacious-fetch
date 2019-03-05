@@ -1,12 +1,13 @@
-if (typeof window === 'undefined') {
-  const fetchImpl = require('node-fetch')
-} else if (window && window.fetch && ('signal' in new window.Request(''))) {
-  const fetchImpl = window.fetch
-} else {
-  const fetchImpl = require('whatwg-fetch')
-}
-import retryingFetch from './retrying-fetch'
+import {fetch as backupFetch} from 'cross-fetch';
+import retryingFetch from './retrying-fetch';
 
+let fetchImpl = false
+
+if (typeof window !== 'undefined' && window.fetch && ('signal' in new window.Request(''))) {
+  fetchImpl = window.fetch
+} else {
+  fetchImpl = backupFetch
+}
 
 async function tenaciousFetch(url = '', config = {}) {
 
@@ -39,7 +40,6 @@ async function tenaciousFetch(url = '', config = {}) {
     delete config.retryDelay
   }
 
-  const start_time = performance.now()
-  return retryingFetch(config.retries, url, config, start_time)
+  return retryingFetch(config.retries, url, config)
 }
 export default tenaciousFetch

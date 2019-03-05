@@ -1,5 +1,15 @@
 {
+    "plugins": ["add-module-exports"],
     "presets": [
-        "env"
+      ["@babel/preset-env",
+        {
+          "modules": "commonjs",
+          "useBuiltIns": "entry",
+          "targets": {
+            "node": "8.9.3",
+            "chrome": "60"
+          }
+        }
+      ],
     ]
 }
