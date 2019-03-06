@@ -4,7 +4,7 @@ import retryingFetch from './retrying-fetch';
 let fetchImpl = false
 
 if (typeof window !== 'undefined' && window.fetch && ('signal' in new window.Request(''))) {
-  fetchImpl = window.fetch
+  fetchImpl = fetch.bind(window)
 } else {
   fetchImpl = backupFetch
 }

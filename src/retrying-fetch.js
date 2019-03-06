@@ -1,13 +1,17 @@
 /* global AbortController */
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only'
-if ((typeof process !== 'undefined') && process.release && (process.release.name === 'node')) {
-  var { performance } = require('perf_hooks');
-}
+import { performance as node_perf } from 'perf_hooks';
 const pRetry = require('p-retry');
+
+if (typeof window === 'undefined' && node_perf) {
+  var perf = node_perf
+} else {
+  var perf = window.performance
+}
 
 
 function retryingFetch(retries, url, config) {
-  const start_time = performance.now()
+  const start_time = perf.now()
   return pRetry(
     (attempt) => {
       if (config.abortTimeout || config.totalTimeLimit) {
@@ -31,7 +35,7 @@ function timeoutRetryPromise(url, config, start_time) {
     new Promise((resolve, reject) => {
       controller = new AbortController();
       config.signal = controller.signal;
-      if (config.totalTimeLimit && performance.now() - start_time > config.totalTimeLimit) {
+      if (config.totalTimeLimit && perf.now() - start_time > config.totalTimeLimit) {
         if (abortTimer) { clearTimer(abortTimer) }
           reject(new pRetry.AbortError(new pRetry.AbortError('Total Time Limit Exceeded')))
       };
