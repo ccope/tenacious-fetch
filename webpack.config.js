@@ -29,6 +29,11 @@ const clientConfig = {
     library: 'tenaciousFetch',
     libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist')
+  },
+  resolve: {
+      alias: {
+        perf_hooks: path.resolve(__dirname, 'src/_empty.js')
+      }
   }
 }
 

@@ -1,8 +1,8 @@
 /* global AbortController */
 import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only'
-try {
-  const { performance } = require('perf_hooks');
-} catch (e) {};
+if ((typeof process !== 'undefined') && process.release && (process.release.name === 'node')) {
+  var { performance } = require('perf_hooks');
+}
 const pRetry = require('p-retry');
 
 
