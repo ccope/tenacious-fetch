@@ -1,6 +1,6 @@
 {
   "name": "tenacious-fetch",
-  "version": "3.0.0-scaleai4",
+  "version": "3.0.0-scaleai5",
   "description": "Tiny fetch API wrapper to add support for retries, retry delay & timeouts",
   "main": "dist/main.node.js",
   "browser": "dist/main.js",
@@ -58,7 +58,7 @@
     ]
   },
   "dependencies": {
-    "abortcontroller-polyfill": "^1.2.4",
+    "abortcontroller-polyfill": "^1.2.5",
     "cross-fetch": "^3.0.1",
     "p-retry": "^3.0.1"
   }
